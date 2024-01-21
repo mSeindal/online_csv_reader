@@ -14,6 +14,25 @@ def get_column_names():
 def get_plot_styles():
     return ['scatter', 'line', 'lines+markers']
 
+def get_figure(df, x_column, y_columns, plot_style):
+    # Plot individual Y-axis columns
+    if plot_style == 'scatter':
+        fig = px.scatter(df, x=x_column, y=y_columns, title='Your Data Visualization',
+                        labels={'value': 'Y-axis Values'}, color_discrete_sequence=px.colors.qualitative.Set1)
+    elif plot_style == 'line':
+        fig = px.line(df, x=x_column, y=y_columns, title='Your Data Visualization',
+                        labels={'value': 'Y-axis Values'}, color_discrete_sequence=px.colors.qualitative.Set1)
+    elif plot_style == 'lines+markers':
+        fig = px.line(df, x=x_column, y=y_columns, title='Your Data Visualization',
+                        labels={'value': 'Y-axis Values'}, color_discrete_sequence=px.colors.qualitative.Set1, markers=True)
+    else:
+        # Default to scatter plot if an unknown style is selected
+        fig = px.scatter(df, x=x_column, y=y_columns, title='Your Data Visualization',
+                        labels={'value': 'Y-axis Values'}, color_discrete_sequence=px.colors.qualitative.Set1)
+
+    return fig
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -38,12 +57,14 @@ def index():
         if sum_y_columns:
             # Sum the selected Y-axis columns
             df['sum_y_columns'] = df[y_columns].sum(axis=1)
-            y_columns = ['sum_y_columns']
+            y_column_sum = ['sum_y_columns']
 
-            # Plot the summed Y-axis columns separately
-            fig_sum = px.line(df, x=x_column, y=y_columns, title='Summed Y-axis Columns',
-                              labels={'value': 'Sum of Y-axis Columns'},
-                              color_discrete_sequence=px.colors.qualitative.Set1, markers=True)
+            mean_value = df[y_column_sum].mean().to_dict()
+            std_value = df[y_column_sum].std().to_dict()
+            min_value = df[y_column_sum].min().to_dict()
+            max_value = df[y_column_sum].max().to_dict()
+
+            fig_sum = get_figure(df=df, x_column=x_column, y_columns=y_column_sum, plot_style=plot_style)
 
             # Convert the Plotly figure to HTML
             plot_sum_html = fig_sum.to_html(full_html=False)
@@ -65,29 +86,26 @@ def index():
             )
 
         else:
-            # Plot individual Y-axis columns
-            if plot_style == 'scatter':
-                fig = px.scatter(df, x=x_column, y=y_columns, title='Your Data Visualization',
-                                labels={'value': 'Y-axis Values'}, color_discrete_sequence=px.colors.qualitative.Set1)
-            elif plot_style == 'line':
-                fig = px.line(df, x=x_column, y=y_columns, title='Your Data Visualization',
-                              labels={'value': 'Y-axis Values'}, color_discrete_sequence=px.colors.qualitative.Set1)
-            elif plot_style == 'lines+markers':
-                fig = px.line(df, x=x_column, y=y_columns, title='Your Data Visualization',
-                              labels={'value': 'Y-axis Values'}, color_discrete_sequence=px.colors.qualitative.Set1, markers=True)
-            else:
-                # Default to scatter plot if an unknown style is selected
-                fig = px.scatter(df, x=x_column, y=y_columns, title='Your Data Visualization',
-                                labels={'value': 'Y-axis Values'}, color_discrete_sequence=px.colors.qualitative.Set1)
+            fig = get_figure(df=df, x_column=x_column, y_columns=y_columns, plot_style=plot_style)
 
             # Convert the Plotly figure to HTML
             plot_html = fig.to_html(full_html=False)
 
-            return render_template('index.html', plot=plot_html, x_column=x_column, y_columns=y_columns,
-                                   column_names=get_column_names(), plot_styles=get_plot_styles(),
-                                   selected_plot_style=plot_style, sum_y_columns=sum_y_columns,
-                                   hidden_y_columns=hidden_y_columns, mean_value=mean_value,
-                                   std_value=std_value, min_value=min_value, max_value=max_value)
+            return render_template(
+                'index.html',
+                plot=plot_html,
+                x_column=x_column,
+                y_columns=y_columns,
+                column_names=get_column_names(),
+                plot_styles=get_plot_styles(),
+                selected_plot_style=plot_style,
+                sum_y_columns=sum_y_columns,
+                hidden_y_columns=hidden_y_columns,
+                mean_value=mean_value,
+                std_value=std_value,
+                min_value=min_value,
+                max_value=max_value
+            )
 
     # Initial render without form submission (use first and second columns as default)
     df = pd.read_csv(data_path)

@@ -10,9 +10,15 @@
 </head>
 <body>
     <div id="container">
-        <div id="plotContainer">
-            {{ plot|safe }}
-        </div>
+        {% if sum_y_columns %}
+            <div id="plotContainer">
+                {{ plot_sum|safe }}
+            </div>
+        {% else %}
+            <div id="plotContainer">
+                {{ plot|safe }}
+            </div>
+        {% endif %}
 
         <div id="controlsContainer">
             <form action="/" method="post" id="dataForm">
@@ -58,7 +64,7 @@
             <div id="infoBox">
                 <h3>Statistics:</h3>
                 {% if sum_y_columns %}
-                    <p>Summed Y-axis Columns:</p>
+                    <h4>Summed Y-axis Columns:</h4>
                     <ul>
                         <li>Mean: {{ mean_value['sum_y_columns'] }}</li>
                         <li>Standard Deviation: {{ std_value['sum_y_columns'] }}</li>
