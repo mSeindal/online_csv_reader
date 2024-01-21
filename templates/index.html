@@ -1,0 +1,91 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Visualization</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div id="container">
+        <div id="plotContainer">
+            {{ plot|safe }}
+        </div>
+
+        <div id="controlsContainer">
+            <form action="/" method="post" id="dataForm">
+                <div class="row">
+                    <div class="control">
+                        <label for="x_column">X-axis Column:</label>
+                        <select id="x_column" name="x_column" onchange="submitForm()" required>
+                            {% for column in column_names %}
+                                <option value="{{ column }}" {% if column == x_column %}selected{% endif %}>{{ column }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="control">
+                        <label for="y_column">Y-axis Columns:</label>
+                        {% for column in column_names %}
+                            {% if column != x_column %}
+                                <div class="y-column-checkbox">
+                                    <input type="checkbox" id="{{ column }}" name="y_column" value="{{ column }}" {% if column in y_columns %}checked{% endif %} onchange="submitForm()">
+                                    <label for="{{ column }}">{{ column }}</label>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <input type="hidden" name="hidden_y_columns" value="{{ ','.join(hidden_y_columns) }}">
+                    </div>
+
+                    <div class="control">
+                        <label for="plot_style">Plot Style:</label>
+                        <select id="plot_style" name="plot_style" onchange="submitForm()">
+                            {% for style in plot_styles %}
+                                <option value="{{ style }}" {% if style == selected_plot_style %}selected{% endif %}>{{ style.capitalize() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="control">
+                        <label for="sum_y_columns">Sum Y-axis Columns:</label>
+                        <input type="checkbox" id="sum_y_columns" name="sum_y_columns" {% if sum_y_columns %}checked{% endif %} onchange="submitForm()">
+                    </div>
+                </div>
+            </form>
+
+            <div id="infoBox">
+                <h3>Statistics:</h3>
+                {% if sum_y_columns %}
+                    <p>Summed Y-axis Columns:</p>
+                    <ul>
+                        <li>Mean: {{ mean_value['sum_y_columns'] }}</li>
+                        <li>Standard Deviation: {{ std_value['sum_y_columns'] }}</li>
+                        <li>Minimum: {{ min_value['sum_y_columns'] }}</li>
+                        <li>Maximum: {{ max_value['sum_y_columns'] }}</li>
+                    </ul>
+                {% else %}
+                    {% for column in column_names %}
+                        {% if column in mean_value %}
+                            <h4>{{ column }} Statistics:</h4>
+                            <ul>
+                                <li>Mean: {{ mean_value[column] }}</li>
+                                <li>Standard Deviation: {{ std_value[column] }}</li>
+                                <li>Minimum: {{ min_value[column] }}</li>
+                                <li>Maximum: {{ max_value[column] }}</li>
+                            </ul>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function submitForm() {
+            document.getElementById("dataForm").submit();
+        }
+    </script>
+</body>
+</html>
