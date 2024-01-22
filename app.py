@@ -26,8 +26,8 @@ def get_figure(df, x_column, y_columns, plot_style):
         fig = px.line(df, x=x_column, y=y_columns, title='Your Data Visualization',
                         labels={'value': 'Y-axis Values'}, color_discrete_sequence=px.colors.qualitative.Set1, markers=True)
     else:
-        # Default to scatter plot if an unknown style is selected
-        fig = px.scatter(df, x=x_column, y=y_columns, title='Your Data Visualization',
+        # Default
+        fig = px.line(df, x=x_column, y=y_columns, title='Your Data Visualization',
                         labels={'value': 'Y-axis Values'}, color_discrete_sequence=px.colors.qualitative.Set1)
 
     return fig
@@ -126,7 +126,7 @@ def index():
 
     default_fig = px.line(df, x=default_x_column, y=[default_y_column],
                           title='Your Data Visualization', labels={'value': 'Y-axis Values'},
-                          color_discrete_sequence=px.colors.qualitative.Set1, markers=True)
+                          color_discrete_sequence=px.colors.qualitative.Set1)
 
     default_plot_html = default_fig.to_html(full_html=False)
 
