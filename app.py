@@ -76,7 +76,7 @@ def index():
                 y_columns=y_columns,
                 column_names=get_column_names(),
                 plot_styles=get_plot_styles(),
-                selected_plot_style='lines+markers',
+                selected_plot_style=plot_style,
                 sum_y_columns=sum_y_columns,
                 hidden_y_columns=hidden_y_columns,
                 mean_value=mean_value,
@@ -132,7 +132,7 @@ def index():
 
     return render_template('index.html', plot=default_plot_html, x_column=default_x_column,
                            y_columns=[default_y_column], column_names=get_column_names(), plot_styles=get_plot_styles(),
-                           selected_plot_style='lines+markers', sum_y_columns=False,
+                           selected_plot_style='lines', sum_y_columns=False,
                            mean_value=mean_value, std_value=std_value, min_value=min_value, max_value=max_value)
 
 
